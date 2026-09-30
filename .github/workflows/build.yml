@@ -19,7 +19,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Generate Android Gradle Files
+    - name: Generate Compatible Android Gradle Files
       run: |
         cat << 'EOF' > settings.gradle
         pluginManagement {
@@ -47,8 +47,8 @@ jobs:
                 mavenCentral()
             }
             dependencies {
-                classpath 'com.android.tools.build:gradle:8.1.1'
-                classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10'
+                classpath 'com.android.tools.build:gradle:8.0.2'
+                classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20'
             }
         }
         task clean(type: Delete) {
@@ -74,6 +74,14 @@ jobs:
                 versionCode 1
                 versionName "1.0"
             }
+
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+            kotlinOptions {
+                jvmTarget = '17'
+            }
         }
 
         dependencies {
@@ -93,3 +101,4 @@ jobs:
       with:
         name: AI-Agent-APK
         path: app/build/outputs/apk/debug/app-debug.apk
+
