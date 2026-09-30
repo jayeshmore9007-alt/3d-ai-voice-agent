@@ -11,93 +11,22 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Generate Complete Android Project Architecture
-      run: |
-        cat << 'EOF' > settings.gradle
-        pluginManagement {
-            repositories {
-                google()
-                mavenCentral()
-                gradlePluginPortal()
-            }
-        }
-        dependencyResolutionManagement {
-            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-            repositories {
-                google()
-                mavenCentral()
-            }
-        }
-        rootProject.name = "AIControl"
-        include ':app'
-        EOF
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
 
-        cat << 'EOF' > build.gradle
-        buildscript {
-            repositories {
-                google()
-                mavenCentral()
-            }
-            dependencies {
-                classpath 'com.android.tools.build:gradle:8.1.1'
-                classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10'
-            }
-        }
-        task clean(type: Delete) {
-            delete rootProject.buildDir
-        }
-        EOF
-
-        mkdir -p app
-        cat << 'EOF' > app/build.gradle
-        plugins {
-            id 'com.android.application'
-            id 'org.jetbrains.kotlin.android'
-        }
-
-        android {
-            namespace 'com.example.aicontrol'
-            compileSdk 33
-
-            defaultConfig {
-                applicationId "com.example.aicontrol"
-                minSdk 24
-                targetSdk 33
-                versionCode 1
-                versionName "1.0"
-            }
-
-            compileOptions {
-                sourceCompatibility JavaVersion.VERSION_17
-                targetCompatibility JavaVersion.VERSION_17
-            }
-            kotlinOptions {
-                jvmTarget = '17'
-            }
-        }
-
-        dependencies {
-            implementation 'androidx.core:core-ktx:1.9.0'
-            implementation 'androidx.appcompat:appcompat:1.6.1'
-        }
-        EOF
-
-    - name: Setup Gradle Wrapper
-      run: gradle wrapper --gradle-version 8.0 --distribution-type bin
-
-    - name: Build Debug APK with Wrapper
-      run: ./gradlew assembleDebug
+    - name: Build Debug APK
+      run: gradle assembleDebug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: AI-Agent-APK
         path: app/build/outputs/apk/debug/app-debug.apk
