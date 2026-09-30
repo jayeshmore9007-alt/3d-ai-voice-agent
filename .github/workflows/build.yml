@@ -19,6 +19,30 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Ensure Android Project Architecture
+      run: |
+        mkdir -p app/src/main
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.RECORD_AUDIO" />
+            <application
+                android:allowBackup="false"
+                android:label="AI Control"
+                android:theme="@style/Theme.AppCompat.DayNight">
+                <service
+                    android:name=".MyAccessibilityService"
+                    android:exported="true"
+                    android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+                    <intent-filter>
+                        <action android:name="android.accessibilityservice.AccessibilityService" />
+                    </intent-filter>
+                </service>
+            </application>
+        </manifest>
+        EOF
+
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
