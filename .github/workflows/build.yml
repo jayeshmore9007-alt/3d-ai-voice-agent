@@ -19,16 +19,29 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
-
-    - name: Create Gradle Project Structure
+    - name: Generate Complete Android Project Files
       run: |
+        # 1. Root settings.gradle
         cat << 'EOF' > settings.gradle
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
+        }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
         rootProject.name = "AIControl"
         include ':app'
         EOF
 
+        # 2. Root build.gradle
         cat << 'EOF' > build.gradle
         buildscript {
             repositories {
@@ -40,14 +53,12 @@ jobs:
                 classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10'
             }
         }
-        allprojects {
-            repositories {
-                google()
-                mavenCentral()
-            }
+        task clean(type: Delete) {
+            delete rootProject.buildDir
         }
         EOF
 
+        # 3. app/build.gradle
         cat << 'EOF' > app/build.gradle
         plugins {
             id 'com.android.application'
@@ -73,10 +84,13 @@ jobs:
         }
         EOF
 
-    - name: Build APK with Gradle
-      run: gradle assembleDebug --stacktrace
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
 
-    - name: Upload APK
+    - name: Build Debug APK
+      run: gradle assembleDebug
+
+    - name: Upload APK Artifact
       uses: actions/upload-artifact@v3
       with:
         name: AI-Agent-APK
